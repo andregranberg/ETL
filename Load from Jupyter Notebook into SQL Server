@@ -1,0 +1,18 @@
+# Import necessary libraries
+import pandas as pd
+import pyodbc 
+
+# Set up a connection between Jupyter Notebook and SQL Server
+conn = pyodbc.connect('Driver={SQL Server};'
+                      'Server=DESKTOP-060BIF9\SQLEXPRESS;'
+                      'Database=userlogin;'
+                      'Trusted_Connection=yes;')
+
+# Assign the value for the cursor of the connection in a variable
+cursor = conn.cursor()
+
+# Specify what data to load into destination database
+cursor.execute("insert into userlogin.dbo.Persons values ('26', '27', '28', '29', '30')")
+
+# Finally, commit the query in order to load the specified data into the database
+conn.commit()
