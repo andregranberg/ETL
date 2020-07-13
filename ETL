@@ -1,0 +1,45 @@
+# Import the necessary libraries for data extraction from world bank data
+import wbdata
+import pandas
+ 
+#set up the countries I want
+countries = ["NO", "SE"]
+ 
+#set up the indicator I want (just build up the dict if you want more than one)
+indicators = {'NY.GDP.MKTP.CD':'GDP'}
+ 
+#grab indicators above for countires above and load into data frame
+df = wbdata.get_dataframe(indicators, country=countries, convert_date=False)
+
+#df is "pivoted", pandas' unstack fucntion helps reshape it into something plottable
+dfu = df.unstack(level=0)
+
+dfu['year'] = dfu.index
+
+# Transform the dataframe (in the variable dfu) into a list where each row in the dataframe represents a list item
+countries = dfu.values.tolist()
+
+# Connect to SQL Server database
+import pyodbc 
+
+# Set up a connection between Jupyter Notebook and SQL Server
+conn = pyodbc.connect('Driver={SQL Server};'
+                      'Server=DESKTOP-060BIF9\SQLEXPRESS;'
+                      'Database=World Bank;'
+                      'Trusted_Connection=yes;')
+
+# Assign the value for the cursor of the connection in a variable
+cursor = conn.cursor()
+
+# Insert each row from a list (originally from a pandas dataframe column) into a SQL Server database
+k = 0
+
+for year in countries:
+    value = str(countries[k]).strip('[]')
+    query = "insert into [World Bank].dbo.GDP values ({})".format(value)
+    cursor.execute(query)
+    k = k + 1
+conn.commit()
+
+# WARNING - The code bellow will close the connection between Jupyter Notebook and SQL Server
+conn.close()
